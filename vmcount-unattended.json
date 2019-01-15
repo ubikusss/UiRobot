@@ -60,6 +60,12 @@
                 "description": "how many Robots?"
             }
         },
+        "existingRobots": {
+            "type": "Int",
+            "metadata": {
+                "description": "how many existing Robots?"
+            }
+        },
         "adminUsername": {
             "type": "String",
             "metadata": {
@@ -109,7 +115,7 @@
     "resources": [
         {
             "type": "Microsoft.Network/networkInterfaces",
-            "name": "[concat(variables('networkInterfaceName'),copyIndex(1))]",
+            "name": "[concat(variables('networkInterfaceName'),add(copyIndex(1), parameters('existingRobots')))]",
             "apiVersion": "2018-04-01",
             "location": "[parameters('location')]",
             "copy": {
@@ -127,7 +133,7 @@
                             },
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIpAddress": {
-                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', concat(variables('publicIpAddressName'),copyIndex(1)))]"
+                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', concat(variables('publicIpAddressName'),add(copyIndex(1), parameters('existingRobots'))))]"
                             }
                         }
                     }
@@ -138,7 +144,7 @@
             },
             "dependsOn": [
                 "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]",
-                "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'),copyIndex(1))]"
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'),add(copyIndex(1), parameters('existingRobots')))]"
             ]
         },
         {
@@ -218,7 +224,7 @@
             "sku": {
                 "name": "[variables('publicIpAddressSku')]"
             },
-            "name": "[concat(variables('publicIpAddressName'),copyIndex(1))]",
+            "name": "[concat(variables('publicIpAddressName'),add(copyIndex(1), parameters('existingRobots')))]",
             "apiVersion": "2018-08-01",
             "location": "[parameters('location')]",
             "copy": {
@@ -232,7 +238,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "name": "[concat(parameters('virtualMachineName'),copyIndex(1))]",
+            "name": "[concat(parameters('virtualMachineName'),add(copyIndex(1), parameters('existingRobots')))]",
             "apiVersion": "2018-04-01",
             "location": "[parameters('location')]",
             "copy": {
@@ -261,12 +267,12 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('networkInterfaceName'),copyIndex(1)))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('networkInterfaceName'),add(copyIndex(1), parameters('existingRobots'))))]"
                         }
                     ]
                 },
                 "osProfile": {
-                    "computerName": "[concat(parameters('virtualMachineName'),copyIndex(1))]",
+                    "computerName": "[concat(parameters('virtualMachineName'),add(copyIndex(1), parameters('existingRobots')))]",
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "windowsConfiguration": {
@@ -276,12 +282,12 @@
                 }
             },
             "dependsOn": [
-                "[concat('Microsoft.Network/networkInterfaces/', concat(variables('networkInterfaceName'),copyIndex(1)))]"
+                "[concat('Microsoft.Network/networkInterfaces/', concat(variables('networkInterfaceName'),add(copyIndex(1), parameters('existingRobots'))))]"
             ]
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(parameters('virtualMachineName'),copyIndex(1),'/CustomScriptExtension')]",
+            "name": "[concat(parameters('virtualMachineName'),add(copyIndex(1), parameters('existingRobots')),'/CustomScriptExtension')]",
             "apiVersion": "2015-06-15",
             "location": "[parameters('location')]",
             "copy": {
@@ -301,7 +307,7 @@
                 }
             },
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', concat(variables('vmName'),copyIndex(1)))]"
+                "[concat('Microsoft.Compute/virtualMachines/', concat(variables('vmName'),add(copyIndex(1), parameters('existingRobots'))))]"
             ]
         }
     ],
